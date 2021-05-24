@@ -2,6 +2,7 @@ package com.libus.cycleposters.Commands;
 
 import com.libus.cycleposters.CyclePosters;
 import com.libus.cycleposters.models.Poster;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,6 +23,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 public class PosterCommand implements CommandExecutor {
 
@@ -106,6 +108,9 @@ public class PosterCommand implements CommandExecutor {
 //                        posterconfig.set("instances." + uuid + ".location.z", location.getZ());
 
                     // set block dimensions of poster display
+
+
+
                     int posterWidth = 3;
                     int posterHeight = 2;
                     if (args.length > 2) posterWidth = Integer.parseInt(args[2]);
@@ -119,7 +124,7 @@ public class PosterCommand implements CommandExecutor {
                         e.printStackTrace();
                     }
 
-                    Poster poster = new Poster(posterWidth, posterHeight, image);
+                    Poster poster = new Poster(posterWidth, posterHeight, plugin, image);
 
                     List<Object> list = new ArrayList<>();
                     list.add(player);

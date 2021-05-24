@@ -1,114 +1,78 @@
 package com.libus.cycleposters.models;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.libus.cycleposters.CyclePosters;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.MapInitializeEvent;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
-public class CustomMapView implements MapView{
+import javax.imageio.ImageIO;
+
+public class CustomMapView implements Listener {
 
     List<MapRenderer> renderers = new ArrayList<>();
-    private int mapID = 0;
 
-    public CustomMapView(int id) {
-        this.mapID = id;
+    private Map<Integer, String> savedImages = new HashMap<Integer, String>();
+
+    private CyclePosters plugin;
+
+    private static CustomMapView instance = null;
+
+    public CustomMapView(CyclePosters pl){
+        plugin = pl;
     }
 
-    @Override
-    public void addRenderer(MapRenderer arg0) {
-        renderers.add(arg0);
+    public static CustomMapView getInstance(CyclePosters plugin) {
+        if (instance == null)
+            instance = new CustomMapView(plugin);
+        return instance;
     }
 
-    @Override
-    public int getCenterX() {
-        return 0;
+    public void init() {
+        Bukkit.getServer().getPluginManager().registerEvents(this, CyclePosters.getPlugin(CyclePosters.class));
+        File dataFile = new File(plugin.getDataFolder() + "/data.yml");
+        YamlConfiguration mapData = YamlConfiguration.loadConfiguration(dataFile);
+        int mapCount = 0;
+        if(mapData.contains("ids")) {
+            for (String id : mapData.getConfigurationSection("ids").getKeys(false)) {
+                mapCount++;
+                savedImages.put(Integer.parseInt(id), mapData.getString("ids." + id));
+            }
+            System.out.println("[CyclePosters] loaded " + mapCount + " poster tiles");
+        }
     }
 
-    @Override
-    public int getCenterZ() {
-        return 0;
-    }
-
-    @Override
-    public int getId() {
-        return mapID;
-    }
-
-    @Override
-    public List<MapRenderer> getRenderers() {
-        return renderers;
-    }
-
-    @Override
-    public Scale getScale() {
-        return Scale.NORMAL;
-    }
-
-    @Override
-    public World getWorld() {
-        return Bukkit.getWorlds().get(0);
-    }
-
-    @Override
-    public boolean isUnlimitedTracking() {
-        return true;
-    }
-
-    @Override
-    public boolean isVirtual() {
-        return true;
-    }
-
-    @Override
-    public boolean removeRenderer(MapRenderer arg0) {
-        return renderers.remove(arg0);
-    }
-
-    @Override
-    public boolean isTrackingPosition() {
-        return false;
-    }
-
-    @Override
-    public void setTrackingPosition(boolean b) {
-
-    }
-
-    @Override
-    public void setCenterX(int arg0) {
-    }
-
-    @Override
-    public void setCenterZ(int arg0) {
+    @EventHandler
+    public void onMapInitEvent(MapInitializeEvent event) throws IOException {
+        if (savedImages.containsKey(event.getMap().getId())) {
+            MapView view = event.getMap();
+            for (MapRenderer renderer : view.getRenderers()) view.removeRenderer(renderer);
+            PosterRenderer renderer = new PosterRenderer();
+            renderer.load(ImageIO.read(new File(plugin.getDataFolder() + "/events/pieces/" + view.getId() + ".jpg")));
+            view.addRenderer(renderer);
+            view.setScale(MapView.Scale.FARTHEST);
+            view.setTrackingPosition(false);
+        }
     }
 
 
-    @Override
-    public void setScale(Scale arg0) {
+    public void saveImage(int id) throws IOException {
+        File dataFile = new File(plugin.getDataFolder() + "/data.yml");
+        YamlConfiguration mapData = YamlConfiguration.loadConfiguration(dataFile);
+        mapData.set("ids." + id, "");
+        mapData.save(dataFile);
     }
-
-    @Override
-    public void setUnlimitedTracking(boolean arg0) {
-    }
-
-    @Override
-    public void setWorld(World arg0) {
-    }
-
-    @Override
-    public boolean isLocked() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public void setLocked(boolean arg0) {
-        // TODO Auto-generated method stub
-
-    }
-
-
 }

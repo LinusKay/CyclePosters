@@ -1,5 +1,6 @@
 package com.libus.cycleposters.models;
 
+import com.libus.cycleposters.CyclePosters;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -10,11 +11,17 @@ import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 
+import static org.bukkit.Rotation.NONE;
+
 public class Poster {
+
+    private CyclePosters plugin;
 
     private int width;
     private int height;
@@ -23,15 +30,17 @@ public class Poster {
     private String faceDirection;
     private String horizontalPlacementDirection;
 
-    public Poster(int width, int height) {
+    public Poster(int width, int height, CyclePosters plugin) {
         this.width = width;
         this.height = height;
+        this.plugin = plugin;
     }
 
-    public Poster(int width, int height, BufferedImage image) {
+    public Poster(int width, int height, CyclePosters plugin, BufferedImage image) {
         this.width = width;
         this.height = height;
         this.image = image;
+        this.plugin = plugin;
     }
 
     public Poster(int width, int height, Location startingLocation, BufferedImage image) {
@@ -99,6 +108,7 @@ public class Poster {
                 PosterRenderer renderer = new PosterRenderer();
 
                 BufferedImage imagePart = scaledImage.getSubimage(x * 128, y * 128, 128, 128);
+
                 renderer.load(imagePart);
                 view.addRenderer(renderer);
 
@@ -109,12 +119,16 @@ public class Poster {
 
                 map.setItemMeta(meta);
 
+
+                //save image to file
+                ImageIO.write(imagePart, "jpg", new File(plugin.getDataFolder() + "/events/pieces/" + view.getId() + ".jpg") );
+
                 /**
                  * THERE IS PROBABLY DEFINITELY A BETTER WAY OF DOING THIS BUT IT IS SO LATE AND I HAVE BEEN AWAKE STUDYING UNTIL 4:30 AM FOR THE PAST FEW NIGHTS AND I SIMPLY AM BEYOND CARING
                  * SORRY XO BUT ALSO HELP
                  * */
                 Location frameLocation = null;
-                Rotation rotation = null;
+                Rotation rotation = NONE;
                 switch(this.faceDirection){
                     case "NORTH":
                         frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - x, this.startingLocation.getY() - y, this.startingLocation.getZ()-2);
@@ -132,7 +146,7 @@ public class Poster {
                         switch(this.horizontalPlacementDirection) {
                             case "NORTH":
                                 frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + x, this.startingLocation.getY() + 1, this.startingLocation.getZ() - 1 + y);
-                                rotation = Rotation.NONE;
+                                rotation = NONE;
                                 break;
                             case "EAST":
                                 frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - y, this.startingLocation.getY() + 1, this.startingLocation.getZ() - 1 + x);
@@ -152,7 +166,7 @@ public class Poster {
                         switch(this.horizontalPlacementDirection) {
                             case "NORTH":
                                 frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + x, this.startingLocation.getY() - 1, this.startingLocation.getZ() - 1 + y);
-                                rotation = Rotation.NONE;
+                                rotation = NONE;
                                 break;
                             case "EAST":
                                 frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - y, this.startingLocation.getY() - 1, this.startingLocation.getZ() - 1 + x);
@@ -174,6 +188,9 @@ public class Poster {
                 ItemFrame frame = this.startingLocation.getWorld().spawn(frameLocation, ItemFrame.class);
                 frame.setItem(map);
                 frame.setRotation(rotation);
+
+                CustomMapView customMapView = CustomMapView.getInstance(this.plugin);
+                customMapView.saveImage(view.getId());
 //                frameLocation.getBlock().setType(Material.RED_CONCRETE);
             }
         }
