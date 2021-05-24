@@ -1,13 +1,18 @@
 package com.libus.cycleposters.Commands;
 
 import com.libus.cycleposters.CyclePosters;
+import com.libus.cycleposters.models.CustomMapView;
 import com.libus.cycleposters.models.Poster;
+import com.libus.cycleposters.models.PosterRenderer;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.map.MapRenderer;
+import org.bukkit.map.MapView;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -178,6 +183,43 @@ public class PosterCommand implements CommandExecutor {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                }
+            }
+
+            else if (command.equals("update")){
+                if(args.length > 1){
+                    if(args.length > 2) {
+                        try {
+                        int mapId = Integer.parseInt(args[1]);
+                        String imageFile = args[2];
+                        MapView view = Bukkit.getServer().getMap(mapId);
+                        for (MapRenderer renderer : view.getRenderers()) view.removeRenderer(renderer);
+                        PosterRenderer renderer = new PosterRenderer();
+                        BufferedImage image = null;
+
+                        image = ImageIO.read(new File(plugin.getDataFolder() + "/events/" + imageFile));
+
+                        renderer.load(image);
+
+                        ImageIO.write(image, "jpg", new File(plugin.getDataFolder() + "/events/pieces/" + view.getId() + ".jpg"));
+
+
+                        view.addRenderer(renderer);
+                        view.setScale(MapView.Scale.FARTHEST);
+                        view.setTrackingPosition(false);
+                        CustomMapView customMapView = CustomMapView.getInstance(plugin);
+
+                            customMapView.saveImage(mapId);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else{
+                        player.sendMessage("Please specify a new image");
+                    }
+                }
+                else{
+                    player.sendMessage("Please specify map id");
                 }
             }
         }

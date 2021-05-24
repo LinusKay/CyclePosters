@@ -68,7 +68,6 @@ public class CustomMapView implements Listener {
         }
     }
 
-
     public void saveImage(int id) throws IOException {
         File dataFile = new File(plugin.getDataFolder() + "/data.yml");
         YamlConfiguration mapData = YamlConfiguration.loadConfiguration(dataFile);

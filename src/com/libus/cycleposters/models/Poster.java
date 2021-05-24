@@ -16,6 +16,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import static org.bukkit.Rotation.NONE;
 
@@ -108,6 +110,10 @@ public class Poster {
                 PosterRenderer renderer = new PosterRenderer();
 
                 BufferedImage imagePart = scaledImage.getSubimage(x * 128, y * 128, 128, 128);
+                //save image to file
+                Files.createDirectories(Paths.get(plugin.getDataFolder() + "/events/pieces/"));
+                ImageIO.write(imagePart, "jpg", new File(plugin.getDataFolder() + "/events/pieces/" + view.getId() + ".jpg"));
+
 
                 renderer.load(imagePart);
                 view.addRenderer(renderer);
@@ -118,10 +124,6 @@ public class Poster {
                 meta.setMapView(view);
 
                 map.setItemMeta(meta);
-
-
-                //save image to file
-                ImageIO.write(imagePart, "jpg", new File(plugin.getDataFolder() + "/events/pieces/" + view.getId() + ".jpg") );
 
                 /**
                  * THERE IS PROBABLY DEFINITELY A BETTER WAY OF DOING THIS BUT IT IS SO LATE AND I HAVE BEEN AWAKE STUDYING UNTIL 4:30 AM FOR THE PAST FEW NIGHTS AND I SIMPLY AM BEYOND CARING
@@ -184,14 +186,12 @@ public class Poster {
                         break;
                 }
 
-
                 ItemFrame frame = this.startingLocation.getWorld().spawn(frameLocation, ItemFrame.class);
                 frame.setItem(map);
                 frame.setRotation(rotation);
 
                 CustomMapView customMapView = CustomMapView.getInstance(this.plugin);
                 customMapView.saveImage(view.getId());
-//                frameLocation.getBlock().setType(Material.RED_CONCRETE);
             }
         }
         return true;
