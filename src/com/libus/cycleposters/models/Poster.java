@@ -1,10 +1,9 @@
 package com.libus.cycleposters.models;
 
-import com.libus.cycleposters.CyclePosters;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
+import org.bukkit.Rotation;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MapMeta;
@@ -14,7 +13,6 @@ import org.bukkit.map.MapView;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.List;
 
 public class Poster {
 
@@ -22,6 +20,8 @@ public class Poster {
     private int height;
     private Location startingLocation;
     private BufferedImage image;
+    private String faceDirection;
+    private String horizontalPlacementDirection;
 
     public Poster(int width, int height) {
         this.width = width;
@@ -73,6 +73,14 @@ public class Poster {
         return this.image;
     }
 
+    public void setFacingDirection(String direction) { this.faceDirection = direction; }
+
+    public String getFacingDirection(){ return this.faceDirection; }
+
+    public void setHorizontalPlacementDirection(String horizontalPlacementDirection) { this.horizontalPlacementDirection = horizontalPlacementDirection; }
+
+    public String getHorizontalPlacementDirection(){ return this.horizontalPlacementDirection; }
+
     public boolean render() throws IOException {
         // scale image to correct dimensions
         int scaleWidth = this.width * 128;
@@ -100,12 +108,73 @@ public class Poster {
                 meta.setMapView(view);
 
                 map.setItemMeta(meta);
-                Location startingLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + x, this.startingLocation.getY() - y, this.startingLocation.getZ());
-                ItemFrame frame = this.startingLocation.getWorld().spawn(startingLocation, ItemFrame.class);
+
+                /**
+                 * THERE IS PROBABLY DEFINITELY A BETTER WAY OF DOING THIS BUT IT IS SO LATE AND I HAVE BEEN AWAKE STUDYING UNTIL 4:30 AM FOR THE PAST FEW NIGHTS AND I SIMPLY AM BEYOND CARING
+                 * SORRY XO BUT ALSO HELP
+                 * */
+                Location frameLocation = null;
+                Rotation rotation = null;
+                switch(this.faceDirection){
+                    case "NORTH":
+                        frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - x, this.startingLocation.getY() - y, this.startingLocation.getZ()-2);
+                        break;
+                    case "EAST":
+                        frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + 1, this.startingLocation.getY() - y, this.startingLocation.getZ()-x-1);
+                        break;
+                    case "SOUTH":
+                        frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + x, this.startingLocation.getY() - y, this.startingLocation.getZ());
+                        break;
+                    case "WEST":
+                        frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - 1, this.startingLocation.getY() - y, this.startingLocation.getZ()+x-1);
+                        break;
+                    case "UP":
+                        switch(this.horizontalPlacementDirection) {
+                            case "NORTH":
+                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + x, this.startingLocation.getY() + 1, this.startingLocation.getZ() - 1 + y);
+                                rotation = Rotation.NONE;
+                                break;
+                            case "EAST":
+                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - y, this.startingLocation.getY() + 1, this.startingLocation.getZ() - 1 + x);
+                                rotation = Rotation.CLOCKWISE_45;
+                                break;
+                            case "SOUTH":
+                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - x , this.startingLocation.getY() + 1, this.startingLocation.getZ() - 1 - y);
+                                rotation = Rotation.CLOCKWISE;
+                                break;
+                            case "WEST":
+                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + y, this.startingLocation.getY() + 1, this.startingLocation.getZ() - 1 - x);
+                                rotation = Rotation.COUNTER_CLOCKWISE_45;
+                                break;
+                        }
+                        break;
+                    case "DOWN":
+                        switch(this.horizontalPlacementDirection) {
+                            case "NORTH":
+                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + x, this.startingLocation.getY() - 1, this.startingLocation.getZ() - 1 + y);
+                                rotation = Rotation.NONE;
+                                break;
+                            case "EAST":
+                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - y, this.startingLocation.getY() - 1, this.startingLocation.getZ() - 1 + x);
+                                rotation = Rotation.COUNTER_CLOCKWISE_45;
+                                break;
+                            case "SOUTH":
+                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - x , this.startingLocation.getY() - 1, this.startingLocation.getZ() - 1 - y);
+                                rotation = Rotation.CLOCKWISE;
+                                break;
+                            case "WEST":
+                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + y, this.startingLocation.getY() - 1, this.startingLocation.getZ() - 1 - x);
+                                rotation = Rotation.CLOCKWISE_45;
+                                break;
+                        }
+                        break;
+                }
+
+
+                ItemFrame frame = this.startingLocation.getWorld().spawn(frameLocation, ItemFrame.class);
                 frame.setItem(map);
-
-//                startingLocation.getBlock().setType(Material.RED_CONCRETE);
-
+                frame.setRotation(rotation);
+//                frameLocation.getBlock().setType(Material.RED_CONCRETE);
             }
         }
         return true;
