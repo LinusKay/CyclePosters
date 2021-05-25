@@ -2,9 +2,9 @@ package com.libus.cycleposters.Events;
 
 import com.libus.cycleposters.CyclePosters;
 import com.libus.cycleposters.models.Poster;
+import com.libus.cycleposters.models.PosterRenderer;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -49,7 +49,8 @@ public class Event implements Listener {
                     poster.setFacingDirection(faceDirection);
                     poster.setHorizontalPlacementDirection(horizontalPlacementDirection);
 
-                    poster.render();
+                    PosterRenderer renderer = new PosterRenderer(plugin);
+                    renderer.render(poster);
                     return;
                 }
             }

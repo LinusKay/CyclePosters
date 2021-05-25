@@ -1,27 +1,8 @@
 package com.libus.cycleposters.models;
 
 import com.libus.cycleposters.CyclePosters;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Rotation;
-import org.bukkit.entity.ItemFrame;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.MapMeta;
-import org.bukkit.map.MapRenderer;
-import org.bukkit.map.MapView;
-
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
-
-import static org.bukkit.Rotation.NONE;
 
 public class Poster {
 
@@ -31,33 +12,17 @@ public class Poster {
     private int width;
     private int height;
     private Location startingLocation;
-    private String imageLocation;
+    private List<String> images;
 
     private String faceDirection;
     private String horizontalPlacementDirection;
-    private List<Integer> maps = new ArrayList<Integer>();
 
-    public Poster(String name, int width, int height, CyclePosters plugin) {
+    public Poster(String name, int width, int height, CyclePosters plugin, List<String> images) {
         this.name = name;
         this.width = width;
         this.height = height;
+        this.images = images;
         this.plugin = plugin;
-    }
-
-    public Poster(String name, int width, int height, CyclePosters plugin, String imageLocation) {
-        this.name = name;
-        this.width = width;
-        this.height = height;
-        this.imageLocation = imageLocation;
-        this.plugin = plugin;
-    }
-
-    public Poster(String name, int width, int height, Location startingLocation, String imageLocation) {
-        this.name = name;
-        this.width = width;
-        this.height = height;
-        this.startingLocation = startingLocation;
-        this.imageLocation = imageLocation;
     }
 
     public void setName(String name) {
@@ -89,15 +54,15 @@ public class Poster {
     }
 
     public Location getStartingLocation() {
-        return this.getStartingLocation();
+        return this.startingLocation;
     }
 
-    public void setImageLocation(String imageLocation) {
-        this.imageLocation = imageLocation;
+    public void setImages(List<String> images) {
+        this.images = images;
     }
 
-    public String getImageLocation() {
-        return this.imageLocation;
+    public List<String> getImages() {
+        return this.images;
     }
 
     public void setFacingDirection(String direction) {
@@ -114,114 +79,5 @@ public class Poster {
 
     public String getHorizontalPlacementDirection() {
         return this.horizontalPlacementDirection;
-    }
-
-    public boolean render() throws IOException {
-        // scale imageLocation to correct dimensions
-        int scaleWidth = this.width * 128;
-        int scaleHeight = this.height * 128;
-        BufferedImage originalImage = ImageIO.read(new File(this.imageLocation));
-        BufferedImage scaledImage = new BufferedImage(scaleWidth, scaleHeight, BufferedImage.TYPE_INT_RGB);
-        Graphics g = scaledImage.createGraphics();
-        g.drawImage(originalImage, 0, 0, scaleWidth, scaleHeight, null);
-        g.dispose();
-
-        for (int y = 0; y < this.height; y++) {
-            for (int x = 0; x < this.width; x++) {
-
-                MapView view = Bukkit.createMap(this.startingLocation.getWorld());
-                for (MapRenderer renderer : view.getRenderers()) view.removeRenderer(renderer);
-
-                PosterRenderer renderer = new PosterRenderer();
-
-                BufferedImage imagePart = scaledImage.getSubimage(x * 128, y * 128, 128, 128);
-                //save imageLocation to file
-                Files.createDirectories(Paths.get(plugin.getDataFolder() + "/events/pieces/"));
-                ImageIO.write(imagePart, "jpg", new File(plugin.getDataFolder() + "/events/pieces/" + view.getId() + ".jpg"));
-
-
-                renderer.load(imagePart);
-                view.addRenderer(renderer);
-
-                ItemStack map = new ItemStack(Material.FILLED_MAP);
-                MapMeta meta = (MapMeta) map.getItemMeta();
-
-                meta.setMapView(view);
-
-                map.setItemMeta(meta);
-
-                /**
-                 * THERE IS PROBABLY DEFINITELY A BETTER WAY OF DOING THIS BUT IT IS SO LATE AND I HAVE BEEN AWAKE STUDYING UNTIL 4:30 AM FOR THE PAST FEW NIGHTS AND I SIMPLY AM BEYOND CARING
-                 * SORRY XO BUT ALSO HELP
-                 * */
-                Location frameLocation = null;
-                Rotation rotation = NONE;
-                switch (this.faceDirection) {
-                    case "NORTH":
-                        frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - x, this.startingLocation.getY() - y, this.startingLocation.getZ() - 2);
-                        break;
-                    case "EAST":
-                        frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + 1, this.startingLocation.getY() - y, this.startingLocation.getZ() - x - 1);
-                        break;
-                    case "SOUTH":
-                        frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + x, this.startingLocation.getY() - y, this.startingLocation.getZ());
-                        break;
-                    case "WEST":
-                        frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - 1, this.startingLocation.getY() - y, this.startingLocation.getZ() + x - 1);
-                        break;
-                    case "UP":
-                        switch (this.horizontalPlacementDirection) {
-                            case "NORTH":
-                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + x, this.startingLocation.getY() + 1, this.startingLocation.getZ() - 1 + y);
-                                rotation = NONE;
-                                break;
-                            case "EAST":
-                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - y, this.startingLocation.getY() + 1, this.startingLocation.getZ() - 1 + x);
-                                rotation = Rotation.CLOCKWISE_45;
-                                break;
-                            case "SOUTH":
-                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - x, this.startingLocation.getY() + 1, this.startingLocation.getZ() - 1 - y);
-                                rotation = Rotation.CLOCKWISE;
-                                break;
-                            case "WEST":
-                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + y, this.startingLocation.getY() + 1, this.startingLocation.getZ() - 1 - x);
-                                rotation = Rotation.COUNTER_CLOCKWISE_45;
-                                break;
-                        }
-                        break;
-                    case "DOWN":
-                        switch (this.horizontalPlacementDirection) {
-                            case "NORTH":
-                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + x, this.startingLocation.getY() - 1, this.startingLocation.getZ() - 1 + y);
-                                rotation = NONE;
-                                break;
-                            case "EAST":
-                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - y, this.startingLocation.getY() - 1, this.startingLocation.getZ() - 1 + x);
-                                rotation = Rotation.COUNTER_CLOCKWISE_45;
-                                break;
-                            case "SOUTH":
-                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - x, this.startingLocation.getY() - 1, this.startingLocation.getZ() - 1 - y);
-                                rotation = Rotation.CLOCKWISE;
-                                break;
-                            case "WEST":
-                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + y, this.startingLocation.getY() - 1, this.startingLocation.getZ() - 1 - x);
-                                rotation = Rotation.CLOCKWISE_45;
-                                break;
-                        }
-                        break;
-                }
-
-                ItemFrame frame = this.startingLocation.getWorld().spawn(frameLocation, ItemFrame.class);
-                frame.setItem(map);
-                frame.setRotation(rotation);
-
-                maps.add(view.getId());
-
-
-            }
-        }
-        CustomMapView customMapView = CustomMapView.getInstance(this.plugin);
-        customMapView.saveImage(this.name, maps, this.imageLocation, this.width, this.height);
-        return true;
     }
 }
