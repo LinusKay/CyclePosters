@@ -37,6 +37,7 @@ public class PosterRenderer extends MapRenderer {
     public PosterRenderer() {
         done = false;
     }
+
     public PosterRenderer(CyclePosters pl) {
         plugin = pl;
         done = false;
@@ -62,6 +63,7 @@ public class PosterRenderer extends MapRenderer {
 
     /**
      * Render poster tiles
+     *
      * @param poster
      * @throws IOException
      */
@@ -169,7 +171,7 @@ public class PosterRenderer extends MapRenderer {
         done = true;
     }
 
-    public void loadNextImage(String posterName){
+    public void loadNextImage(String posterName) {
 
         File dataFile = new File(plugin.getDataFolder() + "/data.yml");
         YamlConfiguration mapData = YamlConfiguration.loadConfiguration(dataFile);
@@ -179,17 +181,25 @@ public class PosterRenderer extends MapRenderer {
             int width = Integer.parseInt(mapData.getString("posters." + posterName + ".width"));
             int height = Integer.parseInt(mapData.getString("posters." + posterName + ".height"));
 
-            List<String> images = mapData.getStringList("posters." + posterName + ".images");
-            int currentImageCount = mapData.getInt("posters." + posterName + ".current_image_index");
-            if(currentImageCount + 1 < images.size()){
-                currentImageCount++;
+
+            int slideCount = 0;
+            for(String slideName : mapData.getConfigurationSection("posters." + posterName + ".slides").getKeys(false)){
+                slideCount++;
             }
-            else{
+            int currentImageCount = mapData.getInt("posters." + posterName + ".current_slide_index");
+
+
+            System.out.println(currentImageCount);
+            if (currentImageCount + 1 < slideCount) {
+                currentImageCount++;
+            } else {
                 currentImageCount = 0;
             }
+
+
             BufferedImage image = null;
             try {
-                image = ImageIO.read(new File(images.get(currentImageCount)));
+                image = ImageIO.read(new File(mapData.getString("posters." + posterName + ".slides.slide_" + currentImageCount + ".image")));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -216,7 +226,7 @@ public class PosterRenderer extends MapRenderer {
                     mapCount++;
                 }
             }
-            mapData.set("posters." + posterName + ".current_image_index", currentImageCount);
+            mapData.set("posters." + posterName + ".current_slide_index", currentImageCount);
             try {
                 mapData.save(dataFile);
             } catch (IOException e) {

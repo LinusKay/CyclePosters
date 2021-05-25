@@ -3,14 +3,25 @@ package com.libus.cycleposters.Events;
 import com.libus.cycleposters.CyclePosters;
 import com.libus.cycleposters.models.Poster;
 import com.libus.cycleposters.models.PosterRenderer;
+import net.md_5.bungee.api.chat.*;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.MapMeta;
+import org.bukkit.map.MapView;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -19,7 +30,7 @@ public class Event implements Listener {
     public Event(CyclePosters pl){ plugin = pl;}
 
     @EventHandler
-    public void onPlayerClick(PlayerInteractEvent event) throws IOException {
+    public void onPlayerPlacePoster(PlayerInteractEvent event) throws IOException {
         if(event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             Player player = event.getPlayer();
             for(List<Object> list : plugin.playerList){
@@ -55,5 +66,48 @@ public class Event implements Listener {
                 }
             }
         }
+    }
+
+    @EventHandler
+    public void onPlayerClickPoster(PlayerInteractEntityEvent event){
+        Player player = event.getPlayer();
+        Entity entity = event.getRightClicked();
+
+        if(entity.getType().name().equals("ITEM_FRAME")){
+            ItemFrame itemFrame = (ItemFrame) entity;
+            ItemStack itemStack = itemFrame.getItem();
+            MapMeta mapMeta = (MapMeta) itemStack.getItemMeta();
+            int mapId = mapMeta.getMapView().getId();
+
+            File dataFile = new File(plugin.getDataFolder() + "/data.yml");
+            YamlConfiguration mapData = YamlConfiguration.loadConfiguration(dataFile);
+
+            if(mapData.contains("posters")){
+                for(String poster : mapData.getConfigurationSection("posters").getKeys(false)){
+                    if(mapData.getIntegerList("posters." + poster + ".maps").contains(mapId)){
+                        int currentSlideIndex = mapData.getInt("posters." + poster + ".current_slide_index");
+                        String clickMessage = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_message");
+                        String clickHover = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_hover");
+                        String clickURL = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_url");
+
+//                        String clickMessage = "click me to go to website!";
+//                        String clickHover = "clickme!";
+//                        String clickURL = "https://csitsociety.club";
+
+                        TextComponent message = new TextComponent(clickMessage);
+                        message.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, clickURL));
+                        message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(clickHover)));
+                        player.spigot().sendMessage(message);
+
+                        event.setCancelled(true);
+                    }
+                }
+            }
+
+
+
+        }
+
+
     }
 }

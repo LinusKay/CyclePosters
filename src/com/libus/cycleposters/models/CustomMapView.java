@@ -51,15 +51,15 @@ public class CustomMapView implements Listener {
             for (String poster : mapData.getConfigurationSection("posters").getKeys(false)) {
                 int i = 0;
                 List<Integer> maplist = mapData.getIntegerList("posters." + poster + ".maps");
-                List<String> images = mapData.getStringList("posters." + poster + ".images");
-                int currentImageIndex = mapData.getInt("current_image_index");
+                int currentSlideIndex = mapData.getInt("current_slide_index");
+                String imageLocation = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".image");
 
                 int width = Integer.parseInt(mapData.getString("posters." + poster + ".width"));
                 int height = Integer.parseInt(mapData.getString("posters." + poster + ".height"));
 
                 BufferedImage image = null;
                 try {
-                    image = ImageIO.read(new File(images.get(currentImageIndex)));
+                    image = ImageIO.read(new File(imageLocation));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -94,8 +94,10 @@ public class CustomMapView implements Listener {
         mapData.set("posters." + name + ".width", width);
         mapData.set("posters." + name + ".height", height);
         mapData.set("posters." + name + ".maps", maps);
-        mapData.set("posters." + name + ".images", images);
-        mapData.set("posters." + name + ".current_image_index", 0);
+        for(int i = 0; i < images.size(); i++){
+            mapData.set("posters." + name + ".slides.slide_" + i + ".image", images.get(i));
+        }
+        mapData.set("posters." + name + ".current_slide_index", 0);
         mapData.save(dataFile);
     }
 }
