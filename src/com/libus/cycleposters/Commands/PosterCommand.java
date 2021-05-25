@@ -69,6 +69,9 @@ public class PosterCommand implements CommandExecutor {
                 }
             }
         }
+        else{
+            player.sendMessage("You do not have permission: cycleposters.manage");
+        }
         return true;
     }
 

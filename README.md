@@ -73,3 +73,4 @@ posters:
 ## To-Do
 * Add checks for existing images/posters
 * Re-factor for improved performance
+* Add customisable plugin messages
