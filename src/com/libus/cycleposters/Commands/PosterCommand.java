@@ -30,41 +30,42 @@ public class PosterCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         Player player = (Player) sender;
+        if(player.hasPermission("cycleposters.manage")) {
+            if (args.length >= 0) {
+                String command = args[0];
 
-        if (args.length >= 0) {
-            String command = args[0];
+                // CREATE POSTER INSTANCE
+                if (command.equals("place")) {
+                    if (args.length > 1) {
+                        String posterName = args[1];
 
-            // CREATE POSTER INSTANCE
-            if (command.equals("place")) {
-                if (args.length > 1) {
-                    String posterName = args[1];
+                        List<String> images = new ArrayList<>();
+                        for (int i = 4; i < args.length; i++) {
+                            images.add(plugin.getDataFolder() + "/" + args[i]);
+                        }
 
-                    List<String> images = new ArrayList<>();
-                    for (int i = 4; i < args.length; i++) {
-                        images.add(plugin.getDataFolder() + "/" + args[i]);
+                        int posterWidth = 3;
+                        int posterHeight = 2;
+                        if (args.length > 2) posterWidth = Integer.parseInt(args[2]);
+                        if (args.length > 3) posterHeight = Integer.parseInt(args[3]);
+
+                        Poster poster = new Poster(posterName, posterWidth, posterHeight, plugin, images);
+
+                        List<Object> list = new ArrayList<>();
+                        list.add(player);
+                        list.add(poster);
+
+                        plugin.playerList.add(list);
+
+                    } else {
+                        player.sendMessage("please specify poster name");
                     }
-
-                    int posterWidth = 3;
-                    int posterHeight = 2;
-                    if (args.length > 2) posterWidth = Integer.parseInt(args[2]);
-                    if (args.length > 3) posterHeight = Integer.parseInt(args[3]);
-
-                    Poster poster = new Poster(posterName, posterWidth, posterHeight, plugin, images);
-
-                    List<Object> list = new ArrayList<>();
-                    list.add(player);
-                    list.add(poster);
-
-                    plugin.playerList.add(list);
-
-                } else {
-                    player.sendMessage("please specify poster name");
-                }
-            } else if (command.equals("next")) {
-                if (args.length > 1) {
-                    String posterName = args[1];
-                    PosterRenderer renderer = new PosterRenderer(plugin);
-                    renderer.loadNextImage(posterName);
+                } else if (command.equals("next")) {
+                    if (args.length > 1) {
+                        String posterName = args[1];
+                        PosterRenderer renderer = new PosterRenderer(plugin);
+                        renderer.loadNextImage(posterName);
+                    }
                 }
             }
         }

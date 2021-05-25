@@ -76,8 +76,13 @@ public class Event implements Listener {
         if(entity.getType().name().equals("ITEM_FRAME")){
             ItemFrame itemFrame = (ItemFrame) entity;
             ItemStack itemStack = itemFrame.getItem();
-            MapMeta mapMeta = (MapMeta) itemStack.getItemMeta();
-            int mapId = mapMeta.getMapView().getId();
+            int mapId;
+            try {
+                MapMeta mapMeta = (MapMeta) itemStack.getItemMeta();
+                mapId = mapMeta.getMapView().getId();
+            } catch(ClassCastException e){
+                return;
+            }
 
             File dataFile = new File(plugin.getDataFolder() + "/data.yml");
             YamlConfiguration mapData = YamlConfiguration.loadConfiguration(dataFile);
@@ -87,6 +92,7 @@ public class Event implements Listener {
                     if(mapData.getIntegerList("posters." + poster + ".maps").contains(mapId)){
                         int currentSlideIndex = mapData.getInt("posters." + poster + ".current_slide_index");
                         if(mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_message") != null) {
+
                             String clickMessage = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_message");
                             String clickHover = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_hover");
                             String clickURL = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_url");
@@ -96,8 +102,8 @@ public class Event implements Listener {
                             message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(clickHover)));
                             player.spigot().sendMessage(message);
 
-                            event.setCancelled(true);
                         }
+                        event.setCancelled(true);
                     }
                 }
             }
