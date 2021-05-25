@@ -5,7 +5,6 @@ import com.libus.cycleposters.models.CustomMapView;
 import com.libus.cycleposters.models.Poster;
 import com.libus.cycleposters.models.PosterRenderer;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,13 +21,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 public class PosterCommand implements CommandExecutor {
 
@@ -45,91 +40,21 @@ public class PosterCommand implements CommandExecutor {
 
         if (args.length >= 0) {
             String command = args[0];
-            // SETUP POSTER
-            if (command.equals("create")) {
-                if (args.length > 1) {
-                    String posterName = args[1];
-                    posterDirectory = plugin.getDataFolder() + "/" + posterName;
-                    player.sendMessage("creating poster " + posterName);
-                    try {
-                        if (Files.exists(Paths.get(posterDirectory))) {
-                            player.sendMessage("Poster already exists!");
-                            return false;
-                        }
-                        Path directory = Files.createDirectories(Paths.get(posterDirectory));
-                        File posterconfigfile = new File(posterDirectory + "/" + posterName + ".yml");
-                        YamlConfiguration posterconfig = YamlConfiguration.loadConfiguration(posterconfigfile);
-                        if (args.length > 2) {
-                            String interval = args[2];
-                            posterconfig.set("interval", interval);
-                        } else {
-                            posterconfig.set("interval", 10);
-                        }
-                        posterconfig.save(posterconfigfile);
-                        player.sendMessage("created directory " + directory);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    player.sendMessage("please specify poster name");
-                }
-            }
-            // SET CYCLE INTERVAL
-            else if (command.equals("setinterval")) {
-                if (args.length > 1) {
-                    String posterName = args[1];
-                    posterDirectory = plugin.getDataFolder() + "/" + posterName;
-                    if (args.length > 2) {
-                        String interval = args[2];
-                        File posterconfigfile = new File(posterDirectory + "/" + posterName + ".yml");
-                        YamlConfiguration posterconfig = YamlConfiguration.loadConfiguration(posterconfigfile);
-                        posterconfig.set("interval", interval);
-                        try {
-                            posterconfig.save(posterconfigfile);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        player.sendMessage("Please specify interval");
-                    }
-                } else {
-                    player.sendMessage("Please specify poster name");
-                }
-            }
+
             // CREATE POSTER INSTANCE
-            else if (command.equals("place")) {
+            if (command.equals("place")) {
                 if (args.length > 1) {
                     String posterName = args[1];
-//                    posterDirectory = plugin.getDataFolder() + "/" + posterName;
-                    posterDirectory = plugin.getDataFolder() + "/events";
-//                    if (Files.exists(Paths.get(plugin.getDataFolder() + "/" + posterName))) {
-
-//                        UUID uuid = UUID.randomUUID();
-//                        Location location = player.getLocation();
-//                        File posterconfigfile = new File(posterDirectory + "/" + posterName + ".yml");
-//                        YamlConfiguration posterconfig = YamlConfiguration.loadConfiguration(posterconfigfile);
-//                        posterconfig.set("instances." + uuid + ".location.x", location.getX());
-//                        posterconfig.set("instances." + uuid + ".location.y", location.getY());
-//                        posterconfig.set("instances." + uuid + ".location.z", location.getZ());
-
-                    // set block dimensions of poster display
-
-
+                    String imageLocation = args[2];
+                    posterDirectory = plugin.getDataFolder().toString();
 
                     int posterWidth = 3;
                     int posterHeight = 2;
-                    if (args.length > 2) posterWidth = Integer.parseInt(args[2]);
-                    if (args.length > 3) posterHeight = Integer.parseInt(args[3]);
+                    if (args.length > 3) posterWidth = Integer.parseInt(args[3]);
+                    if (args.length > 4) posterHeight = Integer.parseInt(args[4]);
 
-                    // create image object, using placeholder image
-                    BufferedImage image = null;
-                    try {
-                        image = ImageIO.read(new File(posterDirectory + "/" + posterName));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
 
-                    Poster poster = new Poster(posterWidth, posterHeight, plugin, image);
+                    Poster poster = new Poster(posterName, posterWidth, posterHeight, plugin, posterDirectory + "/" + imageLocation);
 
                     List<Object> list = new ArrayList<>();
                     list.add(player);
@@ -137,91 +62,83 @@ public class PosterCommand implements CommandExecutor {
 
                     plugin.playerList.add(list);
 
-
-//                        try {
-//                            posterconfig.save(posterconfigfile);
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-//                    } else {
-//                        player.sendMessage("No existing poster");
-//                    }
                 } else {
                     player.sendMessage("please specify poster name");
                 }
-            }
-            // GET POSTER INSTANCES
-            else if (command.equals("getinstances")) {
+            } else if (command.equals("update")) {
                 if (args.length > 1) {
-                    String posterName = args[1];
-                    posterDirectory = plugin.getDataFolder() + "/" + posterName;
-                    File posterconfigfile = new File(posterDirectory + "/" + posterName + ".yml");
-                    YamlConfiguration posterconfig = YamlConfiguration.loadConfiguration(posterconfigfile);
-                    try {
-                        for (String key : posterconfig.getConfigurationSection("instances").getKeys(false)) {
-                            String x = posterconfig.getString("instances." + key + ".location.x");
-                            String y = posterconfig.getString("instances." + key + ".location.y");
-                            String z = posterconfig.getString("instances." + key + ".location.z");
-                            String scale = posterconfig.getString(key + ".scale");
-                            player.sendMessage("uuid: " + key + ", location: [x: " + x + ", y: " + y + ", z: " + z + "], scale: " + scale);
-                        }
-                    } catch (NullPointerException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            // REMOVE POSTER INSTANCES
-            else if (command.equals("removeinstances")) {
-                if (args.length > 1) {
-                    String posterName = args[1];
-                    posterDirectory = plugin.getDataFolder() + "/" + posterName;
-                    File posterconfigfile = new File(posterDirectory + "/" + posterName + ".yml");
-                    YamlConfiguration posterconfig = YamlConfiguration.loadConfiguration(posterconfigfile);
-                    posterconfig.set("instances", null);
-                    try {
-                        posterconfig.save(posterconfigfile);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            else if (command.equals("update")){
-                if(args.length > 1){
-                    if(args.length > 2) {
+                    if (args.length > 2) {
                         try {
-                        int mapId = Integer.parseInt(args[1]);
-                        String imageFile = args[2];
-                        MapView view = Bukkit.getServer().getMap(mapId);
-                        for (MapRenderer renderer : view.getRenderers()) view.removeRenderer(renderer);
-                        PosterRenderer renderer = new PosterRenderer();
-                        BufferedImage image = null;
+                            String posterName = args[1];
+                            String imageFile = args[2];
 
-                        image = ImageIO.read(new File(plugin.getDataFolder() + "/events/" + imageFile));
+                            File dataFile = new File(plugin.getDataFolder() + "/data.yml");
+                            YamlConfiguration mapData = YamlConfiguration.loadConfiguration(dataFile);
+                            if (mapData.contains("posters." + posterName)) {
+                                List<Integer> maps = mapData.getIntegerList("posters." + posterName + ".maps");
+                                int width = Integer.parseInt(mapData.getString("posters." + posterName + ".width"));
+                                int height = Integer.parseInt(mapData.getString("posters." + posterName + ".height"));
+                                BufferedImage image = ImageIO.read(new File(plugin.getDataFolder() + "/" + imageFile));
 
-                        renderer.load(image);
+                                int mapCount = 0;
+                                for (int y = 0; y < height; y++) {
+                                    for (int x = 0; x < width; x++) {
+                                        MapView view = Bukkit.getServer().getMap(maps.get(mapCount));
+                                        for (MapRenderer renderer : view.getRenderers()) view.removeRenderer(renderer);
+                                        PosterRenderer renderer = new PosterRenderer();
 
-                        ImageIO.write(image, "jpg", new File(plugin.getDataFolder() + "/events/pieces/" + view.getId() + ".jpg"));
+                                        BufferedImage scaledImage = new BufferedImage(width * 128, height * 128, BufferedImage.TYPE_INT_RGB);
+                                        Graphics g = scaledImage.createGraphics();
+                                        g.drawImage(image, 0, 0, width * 128, height * 128, null);
+                                        g.dispose();
+
+                                        BufferedImage imagePart = scaledImage.getSubimage(x * 128, y * 128, 128, 128);
+
+                                        renderer.load(imagePart);
 
 
-                        view.addRenderer(renderer);
-                        view.setScale(MapView.Scale.FARTHEST);
-                        view.setTrackingPosition(false);
-                        CustomMapView customMapView = CustomMapView.getInstance(plugin);
+                                        view.addRenderer(renderer);
+                                        view.setScale(MapView.Scale.FARTHEST);
+                                        view.setTrackingPosition(false);
+                                        mapCount++;
+                                    }
+                                }
 
-                            customMapView.saveImage(mapId);
+                                CustomMapView customMapView = CustomMapView.getInstance(plugin);
+                                customMapView.saveImage(posterName, maps, imageFile, width, height);
+                                }
+
+//                            customMapView.saveImage(mapId, this.imageLocation);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                    }
-                    else{
+                    } else {
                         player.sendMessage("Please specify a new image");
                     }
-                }
-                else{
+                } else {
                     player.sendMessage("Please specify map id");
                 }
             }
+//            else if(command.equals("delete")){
+//                if(args.length > 1){
+//                    String posterName = args[1];
+//                    File dataFile = new File(plugin.getDataFolder() + "/data.yml");
+//                    YamlConfiguration mapData = YamlConfiguration.loadConfiguration(dataFile);
+//
+//                    for(String map : mapData.getStringList("posters." + posterName + ".maps")){
+//                        int mapId = Integer.parseInt(map);
+//                        MapView mapView = Bukkit.getServer().getMap(mapId);
+//                        Bukkit.getServer().getMap(mapId).
+//                    }
+//
+//                    mapData.set("posters." + posterName, null);
+//                    try {
+//                        mapData.save(dataFile);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
         }
         return true;
     }

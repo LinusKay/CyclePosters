@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.bukkit.Rotation.NONE;
 
@@ -25,31 +27,45 @@ public class Poster {
 
     private CyclePosters plugin;
 
+    private String name;
     private int width;
     private int height;
     private Location startingLocation;
-    private BufferedImage image;
+    private String imageLocation;
+
     private String faceDirection;
     private String horizontalPlacementDirection;
+    private List<Integer> maps = new ArrayList<Integer>();
 
-    public Poster(int width, int height, CyclePosters plugin) {
+    public Poster(String name, int width, int height, CyclePosters plugin) {
+        this.name = name;
         this.width = width;
         this.height = height;
         this.plugin = plugin;
     }
 
-    public Poster(int width, int height, CyclePosters plugin, BufferedImage image) {
+    public Poster(String name, int width, int height, CyclePosters plugin, String imageLocation) {
+        this.name = name;
         this.width = width;
         this.height = height;
-        this.image = image;
+        this.imageLocation = imageLocation;
         this.plugin = plugin;
     }
 
-    public Poster(int width, int height, Location startingLocation, BufferedImage image) {
+    public Poster(String name, int width, int height, Location startingLocation, String imageLocation) {
+        this.name = name;
         this.width = width;
         this.height = height;
         this.startingLocation = startingLocation;
-        this.image = image;
+        this.imageLocation = imageLocation;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
     }
 
     public void setWidth(int width) {
@@ -76,29 +92,38 @@ public class Poster {
         return this.getStartingLocation();
     }
 
-    public void setImage(BufferedImage image) {
-        this.image = image;
+    public void setImageLocation(String imageLocation) {
+        this.imageLocation = imageLocation;
     }
 
-    public BufferedImage getImage() {
-        return this.image;
+    public String getImageLocation() {
+        return this.imageLocation;
     }
 
-    public void setFacingDirection(String direction) { this.faceDirection = direction; }
+    public void setFacingDirection(String direction) {
+        this.faceDirection = direction;
+    }
 
-    public String getFacingDirection(){ return this.faceDirection; }
+    public String getFacingDirection() {
+        return this.faceDirection;
+    }
 
-    public void setHorizontalPlacementDirection(String horizontalPlacementDirection) { this.horizontalPlacementDirection = horizontalPlacementDirection; }
+    public void setHorizontalPlacementDirection(String horizontalPlacementDirection) {
+        this.horizontalPlacementDirection = horizontalPlacementDirection;
+    }
 
-    public String getHorizontalPlacementDirection(){ return this.horizontalPlacementDirection; }
+    public String getHorizontalPlacementDirection() {
+        return this.horizontalPlacementDirection;
+    }
 
     public boolean render() throws IOException {
-        // scale image to correct dimensions
+        // scale imageLocation to correct dimensions
         int scaleWidth = this.width * 128;
         int scaleHeight = this.height * 128;
+        BufferedImage originalImage = ImageIO.read(new File(this.imageLocation));
         BufferedImage scaledImage = new BufferedImage(scaleWidth, scaleHeight, BufferedImage.TYPE_INT_RGB);
         Graphics g = scaledImage.createGraphics();
-        g.drawImage(this.image, 0, 0, scaleWidth, scaleHeight, null);
+        g.drawImage(originalImage, 0, 0, scaleWidth, scaleHeight, null);
         g.dispose();
 
         for (int y = 0; y < this.height; y++) {
@@ -110,7 +135,7 @@ public class Poster {
                 PosterRenderer renderer = new PosterRenderer();
 
                 BufferedImage imagePart = scaledImage.getSubimage(x * 128, y * 128, 128, 128);
-                //save image to file
+                //save imageLocation to file
                 Files.createDirectories(Paths.get(plugin.getDataFolder() + "/events/pieces/"));
                 ImageIO.write(imagePart, "jpg", new File(plugin.getDataFolder() + "/events/pieces/" + view.getId() + ".jpg"));
 
@@ -131,21 +156,21 @@ public class Poster {
                  * */
                 Location frameLocation = null;
                 Rotation rotation = NONE;
-                switch(this.faceDirection){
+                switch (this.faceDirection) {
                     case "NORTH":
-                        frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - x, this.startingLocation.getY() - y, this.startingLocation.getZ()-2);
+                        frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - x, this.startingLocation.getY() - y, this.startingLocation.getZ() - 2);
                         break;
                     case "EAST":
-                        frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + 1, this.startingLocation.getY() - y, this.startingLocation.getZ()-x-1);
+                        frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + 1, this.startingLocation.getY() - y, this.startingLocation.getZ() - x - 1);
                         break;
                     case "SOUTH":
                         frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + x, this.startingLocation.getY() - y, this.startingLocation.getZ());
                         break;
                     case "WEST":
-                        frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - 1, this.startingLocation.getY() - y, this.startingLocation.getZ()+x-1);
+                        frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - 1, this.startingLocation.getY() - y, this.startingLocation.getZ() + x - 1);
                         break;
                     case "UP":
-                        switch(this.horizontalPlacementDirection) {
+                        switch (this.horizontalPlacementDirection) {
                             case "NORTH":
                                 frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + x, this.startingLocation.getY() + 1, this.startingLocation.getZ() - 1 + y);
                                 rotation = NONE;
@@ -155,7 +180,7 @@ public class Poster {
                                 rotation = Rotation.CLOCKWISE_45;
                                 break;
                             case "SOUTH":
-                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - x , this.startingLocation.getY() + 1, this.startingLocation.getZ() - 1 - y);
+                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - x, this.startingLocation.getY() + 1, this.startingLocation.getZ() - 1 - y);
                                 rotation = Rotation.CLOCKWISE;
                                 break;
                             case "WEST":
@@ -165,7 +190,7 @@ public class Poster {
                         }
                         break;
                     case "DOWN":
-                        switch(this.horizontalPlacementDirection) {
+                        switch (this.horizontalPlacementDirection) {
                             case "NORTH":
                                 frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() + x, this.startingLocation.getY() - 1, this.startingLocation.getZ() - 1 + y);
                                 rotation = NONE;
@@ -175,7 +200,7 @@ public class Poster {
                                 rotation = Rotation.COUNTER_CLOCKWISE_45;
                                 break;
                             case "SOUTH":
-                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - x , this.startingLocation.getY() - 1, this.startingLocation.getZ() - 1 - y);
+                                frameLocation = new Location(this.startingLocation.getWorld(), this.startingLocation.getX() - x, this.startingLocation.getY() - 1, this.startingLocation.getZ() - 1 - y);
                                 rotation = Rotation.CLOCKWISE;
                                 break;
                             case "WEST":
@@ -190,10 +215,13 @@ public class Poster {
                 frame.setItem(map);
                 frame.setRotation(rotation);
 
-                CustomMapView customMapView = CustomMapView.getInstance(this.plugin);
-                customMapView.saveImage(view.getId());
+                maps.add(view.getId());
+
+
             }
         }
+        CustomMapView customMapView = CustomMapView.getInstance(this.plugin);
+        customMapView.saveImage(this.name, maps, this.imageLocation, this.width, this.height);
         return true;
     }
 }

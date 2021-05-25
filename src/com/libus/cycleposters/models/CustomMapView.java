@@ -2,16 +2,10 @@ package com.libus.cycleposters.models;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.libus.cycleposters.CyclePosters;
 import org.bukkit.Bukkit;
-import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -46,12 +40,18 @@ public class CustomMapView implements Listener {
         File dataFile = new File(plugin.getDataFolder() + "/data.yml");
         YamlConfiguration mapData = YamlConfiguration.loadConfiguration(dataFile);
         int mapCount = 0;
-        if(mapData.contains("ids")) {
-            for (String id : mapData.getConfigurationSection("ids").getKeys(false)) {
+        int tileCount = 0;
+        if(mapData.contains("posters")) {
+            for (String poster : mapData.getConfigurationSection("posters").getKeys(false)) {
                 mapCount++;
-                savedImages.put(Integer.parseInt(id), mapData.getString("ids." + id));
+                System.out.println(poster);
+                for(String map : mapData.getStringList("posters." + poster + ".maps")){
+                    tileCount++;
+                    savedImages.put(Integer.parseInt(map), mapData.getString("posters." + poster + ".images"));
+                }
+
             }
-            System.out.println("[CyclePosters] loaded " + mapCount + " poster tiles");
+            System.out.println("[CyclePosters] loaded " + mapCount + " posters with " + tileCount + " tiles");
         }
     }
 
@@ -61,17 +61,20 @@ public class CustomMapView implements Listener {
             MapView view = event.getMap();
             for (MapRenderer renderer : view.getRenderers()) view.removeRenderer(renderer);
             PosterRenderer renderer = new PosterRenderer();
-            renderer.load(ImageIO.read(new File(plugin.getDataFolder() + "/events/pieces/" + view.getId() + ".jpg")));
+            renderer.load(ImageIO.read(new File(plugin.getDataFolder() + "/" + savedImages.get(event.getMap().getId()))));
             view.addRenderer(renderer);
             view.setScale(MapView.Scale.FARTHEST);
             view.setTrackingPosition(false);
         }
     }
 
-    public void saveImage(int id) throws IOException {
+    public void saveImage(String name, List<Integer> maps, String imageLocation, int width, int height) throws IOException {
         File dataFile = new File(plugin.getDataFolder() + "/data.yml");
         YamlConfiguration mapData = YamlConfiguration.loadConfiguration(dataFile);
-        mapData.set("ids." + id, "");
+        mapData.set("posters." + name + ".width", width);
+        mapData.set("posters." + name + ".height", height);
+        mapData.set("posters." + name + ".maps", maps);
+        mapData.set("posters." + name + ".images", imageLocation);
         mapData.save(dataFile);
     }
 }
