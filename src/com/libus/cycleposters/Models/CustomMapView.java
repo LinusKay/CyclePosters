@@ -1,4 +1,4 @@
-package com.libus.cycleposters.models;
+package com.libus.cycleposters.Models;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -10,9 +10,7 @@ import java.util.List;
 import com.libus.cycleposters.CyclePosters;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.server.MapInitializeEvent;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
@@ -83,12 +81,23 @@ public class CustomMapView implements Listener {
                         i++;
                     }
                 }
+
+                int cycleInterval = mapData.getInt("posters." + poster + ".interval") * 20;
+                if(cycleInterval > 0) {
+                    Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this.plugin, new Runnable() {
+                        @Override
+                        public void run() {
+                            PosterRenderer renderer = new PosterRenderer(plugin);
+                            renderer.loadNextImage(poster);
+                        }
+                    }, cycleInterval, cycleInterval);
+                }
             }
         }
     }
 
 
-    public void saveImage(String name, List<Integer> maps, List<String> images, int width, int height) throws IOException {
+    public void saveImage(String name, List<Integer> maps, List<String> images, int width, int height, int interval) throws IOException {
         File dataFile = new File(plugin.getDataFolder() + "/data.yml");
         YamlConfiguration mapData = YamlConfiguration.loadConfiguration(dataFile);
         mapData.set("posters." + name + ".width", width);
@@ -98,6 +107,7 @@ public class CustomMapView implements Listener {
             mapData.set("posters." + name + ".slides.slide_" + i + ".image", images.get(i));
         }
         mapData.set("posters." + name + ".current_slide_index", 0);
+        mapData.set("posters." + name + ".interval", interval);
         mapData.save(dataFile);
     }
 }

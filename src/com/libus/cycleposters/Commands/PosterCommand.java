@@ -1,8 +1,8 @@
 package com.libus.cycleposters.Commands;
 
 import com.libus.cycleposters.CyclePosters;
-import com.libus.cycleposters.models.Poster;
-import com.libus.cycleposters.models.PosterRenderer;
+import com.libus.cycleposters.Models.Poster;
+import com.libus.cycleposters.Models.PosterRenderer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

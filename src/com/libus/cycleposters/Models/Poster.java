@@ -1,4 +1,4 @@
-package com.libus.cycleposters.models;
+package com.libus.cycleposters.Models;
 
 import com.libus.cycleposters.CyclePosters;
 import org.bukkit.Location;

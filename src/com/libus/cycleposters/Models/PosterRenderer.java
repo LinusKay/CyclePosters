@@ -1,4 +1,4 @@
-package com.libus.cycleposters.models;
+package com.libus.cycleposters.Models;
 
 import com.libus.cycleposters.CyclePosters;
 import org.bukkit.Bukkit;
@@ -167,7 +167,15 @@ public class PosterRenderer extends MapRenderer {
             }
         }
         CustomMapView customMapView = CustomMapView.getInstance(this.plugin);
-        customMapView.saveImage(poster.getName(), maps, poster.getImages(), poster.getWidth(), poster.getHeight());
+
+        int interval;
+        if(poster.getImages().size() == 1){
+            interval = 0;
+        }
+        else{
+            interval = 10;
+        }
+        customMapView.saveImage(poster.getName(), maps, poster.getImages(), poster.getWidth(), poster.getHeight(), interval);
         done = true;
     }
 
@@ -181,21 +189,17 @@ public class PosterRenderer extends MapRenderer {
             int width = Integer.parseInt(mapData.getString("posters." + posterName + ".width"));
             int height = Integer.parseInt(mapData.getString("posters." + posterName + ".height"));
 
-
             int slideCount = 0;
             for(String slideName : mapData.getConfigurationSection("posters." + posterName + ".slides").getKeys(false)){
                 slideCount++;
             }
             int currentImageCount = mapData.getInt("posters." + posterName + ".current_slide_index");
 
-
-            System.out.println(currentImageCount);
             if (currentImageCount + 1 < slideCount) {
                 currentImageCount++;
             } else {
                 currentImageCount = 0;
             }
-
 
             BufferedImage image = null;
             try {

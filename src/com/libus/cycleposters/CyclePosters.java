@@ -2,9 +2,9 @@ package com.libus.cycleposters;
 
 import com.libus.cycleposters.Commands.PosterCommand;
 import com.libus.cycleposters.Events.Event;
-import com.libus.cycleposters.models.CustomMapView;
-import org.bukkit.inventory.meta.MapMeta;
-import org.bukkit.map.MapView;
+import com.libus.cycleposters.Models.CustomMapView;
+import com.libus.cycleposters.Models.PosterRenderer;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -19,6 +19,10 @@ public class CyclePosters extends JavaPlugin {
 
         CustomMapView customMapView = CustomMapView.getInstance(this);
         customMapView.init();
+
+
+
+
 
         getCommand("poster").setExecutor(new PosterCommand(this));
         getServer().getPluginManager().registerEvents(new Event(this), this);

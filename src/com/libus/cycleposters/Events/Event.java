@@ -1,15 +1,14 @@
 package com.libus.cycleposters.Events;
 
 import com.libus.cycleposters.CyclePosters;
-import com.libus.cycleposters.models.Poster;
-import com.libus.cycleposters.models.PosterRenderer;
+import com.libus.cycleposters.Models.Poster;
+import com.libus.cycleposters.Models.PosterRenderer;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,7 +18,6 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MapMeta;
-import org.bukkit.map.MapView;
 
 import java.io.File;
 import java.io.IOException;
