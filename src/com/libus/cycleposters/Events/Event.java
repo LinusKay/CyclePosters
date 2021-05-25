@@ -86,20 +86,18 @@ public class Event implements Listener {
                 for(String poster : mapData.getConfigurationSection("posters").getKeys(false)){
                     if(mapData.getIntegerList("posters." + poster + ".maps").contains(mapId)){
                         int currentSlideIndex = mapData.getInt("posters." + poster + ".current_slide_index");
-                        String clickMessage = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_message");
-                        String clickHover = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_hover");
-                        String clickURL = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_url");
+                        if(mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_message") != null) {
+                            String clickMessage = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_message");
+                            String clickHover = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_hover");
+                            String clickURL = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_url");
 
-//                        String clickMessage = "click me to go to website!";
-//                        String clickHover = "clickme!";
-//                        String clickURL = "https://csitsociety.club";
+                            TextComponent message = new TextComponent(clickMessage);
+                            message.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, clickURL));
+                            message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(clickHover)));
+                            player.spigot().sendMessage(message);
 
-                        TextComponent message = new TextComponent(clickMessage);
-                        message.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, clickURL));
-                        message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(clickHover)));
-                        player.spigot().sendMessage(message);
-
-                        event.setCancelled(true);
+                            event.setCancelled(true);
+                        }
                     }
                 }
             }
