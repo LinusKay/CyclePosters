@@ -65,7 +65,8 @@ posters:
         # will change whenever slide is updated
         current_slide_index: 0
         # time interval (in seconds) between automatic slide changes
-        # auto set to 10 when multiple images are provided. single image posters will be auto set to 0, meaning no cycle will take place.
+        # auto set to 10 when multiple images are provided. 
+        # single image posters will be auto set to 0, meaning no cycle will take place.
         interval: 10
 ```
 
