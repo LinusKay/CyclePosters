@@ -4,7 +4,7 @@
 
 A plugin that allows you to place any image in game, in the form of a "poster" made up of maps/item frames. These posters can be assigned multiple images, and cycled through manually. Posters can additionally be setup to provide the user with a clickable message linked to  a URL. 
 
-##Commands
+## Commands
 #### /poster place \<poster name> \<width> \<height> \<image> [image .. image]
 *eg: /poster place events 3 2 welcome.png events/partyevent.png*
 
@@ -21,14 +21,14 @@ place poster of given size at click location.
 manually cycle poster to next slide
 * poster name: unique name to identify poster
 
-##Permissions
+## Permissions
 
-####cycleposters.manage
+#### cycleposters.manage
 required to run *any* commands
 
-##Config Structure
+## Config Structure
 
-####data.yml
+#### data.yml
 all poster data is stored in data.yml
 this contains the name, size and image data. 
 ```yaml
@@ -60,6 +60,6 @@ posters:
                 click_url: https://csitsociety.club/
 ```
 
-##To-Do
+## To-Do
 * Implement auto-cycling of poster on specified interval
 * Re-factor for improved performance
