@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="CyclePosters:jar2">
+    <output-path>$PROJECT_DIR$</output-path>
+    <root id="archive" name="CyclePosters.jar">
+      <element id="module-output" name="CyclePosters" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../dependencies/spigot-1.16.5.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

@@ -22,10 +22,12 @@ manually cycle poster to next slide
 * poster name: unique name to identify poster
 
 ##Permissions
+
 ####cycleposters.manage
 required to run *any* commands
 
 ##Config Structure
+
 ####data.yml
 all poster data is stored in data.yml
 this contains the name, size and image data. 
@@ -60,3 +62,4 @@ posters:
 
 ##To-Do
 * Implement auto-cycling of poster on specified interval
+* Re-factor for improved performance
