@@ -5,11 +5,11 @@ import com.libus.cycleposters.Models.Poster;
 import com.libus.cycleposters.Models.PosterRenderer;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.chat.hover.content.Text;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
@@ -19,10 +19,12 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.MapMeta;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Event implements Listener {
@@ -133,6 +135,47 @@ public class Event implements Listener {
 
                             Location teleportLocation = new Location(teleportWorld, teleportX, teleportY, teleportZ);
                             player.teleport(teleportLocation);
+                        }
+
+                        /**
+                         * Give item on click
+                         * Very primitive for now
+                         * Potentially getting a little out of scope
+                         */
+                        if(mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_item") != null){
+                            String itemType = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_item");
+                            ItemStack item = new ItemStack(Material.matchMaterial(itemType), 1);
+                            ItemMeta meta = item.getItemMeta();
+
+                            String itemName = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_item_name");
+                            if(itemName != null) {
+                                meta.setDisplayName(itemName);
+                            }
+
+                            List<String> itemLore = mapData.getStringList("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_item_lore");
+                            if(itemLore != null) {
+                                List<String> lore = new ArrayList<>();
+                                for(String loreline : itemLore) lore.add(loreline);
+                                meta.setLore(lore);
+                            }
+
+                            item.setItemMeta(meta);
+                            player.getInventory().addItem(item);
+                        }
+
+                        /**
+                         * Run command as player on click
+                         */
+                        if(mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".run_command") != null){
+                            String command = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".run_command");
+                            command = command.replace("{player}", player.getName());
+                            if(mapData.getBoolean("posters." + poster + ".slides.slide_" + currentSlideIndex + ".run_command_as_console")){
+                                ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+                                Bukkit.dispatchCommand(console, command);
+                            }
+                            else {
+                                player.performCommand(command);
+                            }
                         }
 
                         event.setCancelled(true);
