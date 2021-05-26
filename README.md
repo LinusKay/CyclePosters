@@ -1,12 +1,15 @@
 # CyclePosters
 
-(i am probably going to rename this better at some point)
+![Image of plugin in action. A 9x6 wall of maps displays a number of cycling images](https://media0.giphy.com/media/CwNQl9X9l7DRhNj3lg/giphy.gif?cid=790b761145b82b9ade04a9ddf83e11967d1708eb87dcb67d&rid=giphy.gif&ct=g)
+
+*PLEASE NOTE that this plugin is currently in early stages, and contains a number of unchecked errors and performance issues. It is not presently recommended for production servers, as you may experience issues. The plugin will also likely undergo a name change in the coming future.*
+
 
 A plugin that allows you to place any image in game, in the form of a "poster" made up of maps/item frames. These
 posters can be assigned multiple images, which can cycle on a specified interval. Posters can additionally be setup to
-provide the user with a clickable message linked to a URL.
+provide the user with a clickable message linked to a URL. 
 
-NOTE: newly created posters will only begin their automatic cycle upon server restart.
+
 
 ## Commands
 
@@ -14,7 +17,7 @@ NOTE: newly created posters will only begin their automatic cycle upon server re
 
 place poster of given size at click location. if more than one image is given, poster will automatically be set to cycle
 between slides every 10 seconds. if only one image is provided, cycling will be disabled. These can be edited in
-data.yml.
+data.yml. *Newly created posters will only begin their automatic cycle upon server restart.*
 
 * poster name: unique name to identify poster
 * width: width (in blocks) of poster
@@ -139,3 +142,6 @@ posters:
 * Add customisable plugin messages
 * Add colours/formatting in click messages
 * Add function for deleting entire poster, to save on arduous manual labour
+* Allow poster slides to accept URLs, as well as local files
+* Allow interactions to be locked behind permission nodes
+* Allow slide interactions to perform different actions depending on player permissions
