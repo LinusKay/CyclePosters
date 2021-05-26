@@ -5,7 +5,9 @@ import com.libus.cycleposters.Models.Poster;
 import com.libus.cycleposters.Models.PosterRenderer;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.chat.hover.content.Text;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Entity;
@@ -25,14 +27,17 @@ import java.util.List;
 
 public class Event implements Listener {
     private CyclePosters plugin;
-    public Event(CyclePosters pl){ plugin = pl;}
+
+    public Event(CyclePosters pl) {
+        plugin = pl;
+    }
 
     @EventHandler
     public void onPlayerPlacePoster(PlayerInteractEvent event) throws IOException {
-        if(event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             Player player = event.getPlayer();
-            for(List<Object> list : plugin.playerList){
-                if(list.contains(player)) {
+            for (List<Object> list : plugin.playerList) {
+                if (list.contains(player)) {
                     Poster poster = (Poster) list.get(1);
                     plugin.playerList.remove(list);
 
@@ -53,7 +58,7 @@ public class Event implements Listener {
 
                     String horizontalPlacementDirection = player.getFacing().toString();
 
-                    Location location = new Location(player.getWorld(), clickedBlock.getX(), clickedBlock.getY(), clickedBlock.getZ()+1);
+                    Location location = new Location(player.getWorld(), clickedBlock.getX(), clickedBlock.getY(), clickedBlock.getZ() + 1);
                     poster.setStartingLocation(location);
                     poster.setFacingDirection(faceDirection);
                     poster.setHorizontalPlacementDirection(horizontalPlacementDirection);
@@ -67,45 +72,73 @@ public class Event implements Listener {
     }
 
     @EventHandler
-    public void onPlayerClickPoster(PlayerInteractEntityEvent event){
+    public void onPlayerClickPoster(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
         Entity entity = event.getRightClicked();
 
-        if(entity.getType().name().equals("ITEM_FRAME")){
+        if (entity.getType().name().equals("ITEM_FRAME")) {
             ItemFrame itemFrame = (ItemFrame) entity;
             ItemStack itemStack = itemFrame.getItem();
             int mapId;
             try {
                 MapMeta mapMeta = (MapMeta) itemStack.getItemMeta();
                 mapId = mapMeta.getMapView().getId();
-            } catch(ClassCastException e){
+            } catch (ClassCastException e) {
                 return;
             }
 
             File dataFile = new File(plugin.getDataFolder() + "/data.yml");
             YamlConfiguration mapData = YamlConfiguration.loadConfiguration(dataFile);
 
-            if(mapData.contains("posters")){
-                for(String poster : mapData.getConfigurationSection("posters").getKeys(false)){
-                    if(mapData.getIntegerList("posters." + poster + ".maps").contains(mapId)){
+            if (mapData.contains("posters")) {
+                for (String poster : mapData.getConfigurationSection("posters").getKeys(false)) {
+                    if (mapData.getIntegerList("posters." + poster + ".maps").contains(mapId)) {
                         int currentSlideIndex = mapData.getInt("posters." + poster + ".current_slide_index");
-                        if(mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_message") != null) {
+
+                        /**
+                         * URL message on poster click
+                         * url and hover message are optional
+                         */
+                        if (mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_message") != null) {
 
                             String clickMessage = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_message");
                             String clickHover = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_hover");
                             String clickURL = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_url");
 
                             TextComponent message = new TextComponent(clickMessage);
-                            message.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, clickURL));
-                            message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(clickHover)));
+                            if (clickHover != null) {
+                                message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(clickHover)));
+                            }
+                            if (clickURL != null) {
+                                message.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, clickURL));
+                            }
                             player.spigot().sendMessage(message);
-
                         }
+
+                        /**
+                         * Teleport on poster click
+                         * if teleport_safely is true in slide, player will be placed on ground
+                         */
+                        if (mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".teleport") != null) {
+                            List<String> teleportData = mapData.getStringList("posters." + poster + ".slides.slide_" + currentSlideIndex + ".teleport");
+                            World teleportWorld = Bukkit.getWorld(teleportData.get(0));
+                            int teleportX = Integer.parseInt(teleportData.get(1));
+                            int teleportY = Integer.parseInt(teleportData.get(2));
+                            int teleportZ = Integer.parseInt(teleportData.get(3));
+
+                            boolean teleport_safely = mapData.getBoolean("posters." + poster + ".slides.slide_" + currentSlideIndex + ".teleport_safely");
+                            if (teleport_safely) {
+                                teleportY = teleportWorld.getHighestBlockYAt(teleportX, teleportZ) + 1;
+                            }
+
+                            Location teleportLocation = new Location(teleportWorld, teleportX, teleportY, teleportZ);
+                            player.teleport(teleportLocation);
+                        }
+
                         event.setCancelled(true);
                     }
                 }
             }
-
 
 
         }

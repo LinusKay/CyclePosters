@@ -56,11 +56,23 @@ posters:
                 # images must be located somewhere within plugins/CyclePosters
                 image: plugins\CyclePosters/welcome.png
                 # message to show in chat upon click
-                click_message: Learn about our welcome event!
+                # messages can have both/either/neither of hover/URL 
+                click_message: Learn about our cool event!
                 # text to show on chat message hover
-                click_hover: Click here to visit website!
+                click_hover: Click here to visit our website!
                 # link to take user to on chat message click
-                click_url: https://csitsociety.club/
+                click_url: https://google.com/
+                # if true, player will be teleported to ground/highest block at location
+                # disable if not concerned about dangerous teleport location
+                teleport_safely: true
+                # location to teleport user
+                # first item must match name of existing world
+                # following three are X Y Z respectively
+                teleport:
+                  - "world"
+                  - 2500
+                  - 100
+                  - -1739
         # currently displayed slide
         # will change whenever slide is updated
         current_slide_index: 0
@@ -74,3 +86,5 @@ posters:
 * Add checks for existing images/posters
 * Re-factor for improved performance
 * Add customisable plugin messages
+* Add colours/formatting in click messages
+* Add function for deleting entire poster, to save on arduous manual labour
