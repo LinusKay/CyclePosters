@@ -98,8 +98,7 @@ public class Event implements Listener {
                         int currentSlideIndex = mapData.getInt("posters." + poster + ".current_slide_index");
 
                         /**
-                         * URL message on poster click
-                         * url and hover message are optional
+                         * show message on click
                          */
                         if (mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_message") != null) {
 
@@ -107,7 +106,7 @@ public class Event implements Listener {
                             String clickHover = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_hover");
                             String clickURL = mapData.getString("posters." + poster + ".slides.slide_" + currentSlideIndex + ".click_url");
 
-                            TextComponent message = new TextComponent(clickMessage);
+                            TextComponent message = new TextComponent(TextComponent.fromLegacyText(clickMessage));
                             if (clickHover != null) {
                                 message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new Text(clickHover)));
                             }

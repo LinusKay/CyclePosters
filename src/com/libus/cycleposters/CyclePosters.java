@@ -7,12 +7,15 @@ import com.libus.cycleposters.Models.PosterRenderer;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CyclePosters extends JavaPlugin {
 
     public List<List<Object>> playerList = new ArrayList<>();
+    public Map<String, Map<String, Map<Integer, BufferedImage>>> postermap;
 
     @Override
     public void onEnable(){

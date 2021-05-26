@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.bukkit.Rotation.NONE;
 
@@ -32,7 +33,7 @@ public class PosterRenderer extends MapRenderer {
 
     private CyclePosters plugin;
 
-    private List<Integer> maps = new ArrayList<Integer>();
+    private List<Integer> maps = new ArrayList<>();
 
     public PosterRenderer() {
         done = false;
@@ -51,22 +52,13 @@ public class PosterRenderer extends MapRenderer {
         done = true;
     }
 
-    public PosterRenderer(String url) {
-        done = false;
-    }
-
     public boolean load(BufferedImage image) {
         image = MapPalette.resizeImage(image);
         this.image = image;
         return false;
     }
 
-    /**
-     * Render poster tiles
-     *
-     * @param poster
-     * @throws IOException
-     */
+
     public void render(Poster poster) throws IOException {
         if (done) return;
         int scaleWidth = poster.getWidth() * 128;
@@ -119,42 +111,42 @@ public class PosterRenderer extends MapRenderer {
                         break;
                     case "UP":
                         switch (poster.getHorizontalPlacementDirection()) {
-                            case "NORTH":
+                            case "NORTH" -> {
                                 frameLocation = new Location(poster.getStartingLocation().getWorld(), poster.getStartingLocation().getX() + x, poster.getStartingLocation().getY() + 1, poster.getStartingLocation().getZ() - 1 + y);
                                 rotation = NONE;
-                                break;
-                            case "EAST":
+                            }
+                            case "EAST" -> {
                                 frameLocation = new Location(poster.getStartingLocation().getWorld(), poster.getStartingLocation().getX() - y, poster.getStartingLocation().getY() + 1, poster.getStartingLocation().getZ() - 1 + x);
                                 rotation = Rotation.CLOCKWISE_45;
-                                break;
-                            case "SOUTH":
+                            }
+                            case "SOUTH" -> {
                                 frameLocation = new Location(poster.getStartingLocation().getWorld(), poster.getStartingLocation().getX() - x, poster.getStartingLocation().getY() + 1, poster.getStartingLocation().getZ() - 1 - y);
                                 rotation = Rotation.CLOCKWISE;
-                                break;
-                            case "WEST":
+                            }
+                            case "WEST" -> {
                                 frameLocation = new Location(poster.getStartingLocation().getWorld(), poster.getStartingLocation().getX() + y, poster.getStartingLocation().getY() + 1, poster.getStartingLocation().getZ() - 1 - x);
                                 rotation = Rotation.COUNTER_CLOCKWISE_45;
-                                break;
+                            }
                         }
                         break;
                     case "DOWN":
                         switch (poster.getHorizontalPlacementDirection()) {
-                            case "NORTH":
+                            case "NORTH" -> {
                                 frameLocation = new Location(poster.getStartingLocation().getWorld(), poster.getStartingLocation().getX() + x, poster.getStartingLocation().getY() - 1, poster.getStartingLocation().getZ() - 1 + y);
                                 rotation = NONE;
-                                break;
-                            case "EAST":
+                            }
+                            case "EAST" -> {
                                 frameLocation = new Location(poster.getStartingLocation().getWorld(), poster.getStartingLocation().getX() - y, poster.getStartingLocation().getY() - 1, poster.getStartingLocation().getZ() - 1 + x);
                                 rotation = Rotation.COUNTER_CLOCKWISE_45;
-                                break;
-                            case "SOUTH":
+                            }
+                            case "SOUTH" -> {
                                 frameLocation = new Location(poster.getStartingLocation().getWorld(), poster.getStartingLocation().getX() - x, poster.getStartingLocation().getY() - 1, poster.getStartingLocation().getZ() - 1 - y);
                                 rotation = Rotation.CLOCKWISE;
-                                break;
-                            case "WEST":
+                            }
+                            case "WEST" -> {
                                 frameLocation = new Location(poster.getStartingLocation().getWorld(), poster.getStartingLocation().getX() + y, poster.getStartingLocation().getY() - 1, poster.getStartingLocation().getZ() - 1 - x);
                                 rotation = Rotation.CLOCKWISE_45;
-                                break;
+                            }
                         }
                         break;
                 }
@@ -169,66 +161,44 @@ public class PosterRenderer extends MapRenderer {
         CustomMapView customMapView = CustomMapView.getInstance(this.plugin);
 
         int interval;
-        if(poster.getImages().size() == 1){
+        if (poster.getImages().size() == 1) {
             interval = 0;
-        }
-        else{
+        } else {
             interval = 10;
         }
         customMapView.saveImage(poster.getName(), maps, poster.getImages(), poster.getWidth(), poster.getHeight(), interval);
         done = true;
     }
 
-    public void loadNextImage(String posterName) {
+    public void loadNextImage(String posterName) throws IOException {
 
         File dataFile = new File(plugin.getDataFolder() + "/data.yml");
         YamlConfiguration mapData = YamlConfiguration.loadConfiguration(dataFile);
 
         if (mapData.contains("posters." + posterName)) {
             List<Integer> maps = mapData.getIntegerList("posters." + posterName + ".maps");
-            int width = Integer.parseInt(mapData.getString("posters." + posterName + ".width"));
-            int height = Integer.parseInt(mapData.getString("posters." + posterName + ".height"));
-
-            int slideCount = 0;
-            for(String slideName : mapData.getConfigurationSection("posters." + posterName + ".slides").getKeys(false)){
-                slideCount++;
-            }
             int currentImageCount = mapData.getInt("posters." + posterName + ".current_slide_index");
+            Set<String> slides = mapData.getConfigurationSection("posters." + posterName + ".slides").getKeys(false);
+            for (String slide : slides) {
+                if (slide.equals("slide_" + currentImageCount)) {
+                    for (int mapId : maps) {
+                        BufferedImage imagePart = plugin.postermap.get(posterName).get(slide).get(mapId);
 
-            if (currentImageCount + 1 < slideCount) {
+                        MapView view = Bukkit.getServer().getMap(mapId);
+                        for (MapRenderer renderer : view.getRenderers()) view.removeRenderer(renderer);
+                        PosterRenderer renderer = new PosterRenderer();
+
+                        renderer.load(imagePart);
+                        view.addRenderer(renderer);
+                        view.setScale(MapView.Scale.FARTHEST);
+                        view.setTrackingPosition(false);
+                    }
+                }
+            }
+            if (currentImageCount + 1 < slides.size()) {
                 currentImageCount++;
             } else {
                 currentImageCount = 0;
-            }
-
-            BufferedImage image = null;
-            try {
-                image = ImageIO.read(new File(mapData.getString("posters." + posterName + ".slides.slide_" + currentImageCount + ".image")));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            int mapCount = 0;
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    MapView view = Bukkit.getServer().getMap(maps.get(mapCount));
-                    for (MapRenderer renderer : view.getRenderers()) view.removeRenderer(renderer);
-                    PosterRenderer renderer = new PosterRenderer();
-
-                    BufferedImage scaledImage = new BufferedImage(width * 128, height * 128, BufferedImage.TYPE_INT_RGB);
-                    Graphics g = scaledImage.createGraphics();
-                    g.drawImage(image, 0, 0, width * 128, height * 128, null);
-                    g.dispose();
-
-                    BufferedImage imagePart = scaledImage.getSubimage(x * 128, y * 128, 128, 128);
-
-                    renderer.load(imagePart);
-
-                    view.addRenderer(renderer);
-                    view.setScale(MapView.Scale.FARTHEST);
-                    view.setTrackingPosition(false);
-                    mapCount++;
-                }
             }
             mapData.set("posters." + posterName + ".current_slide_index", currentImageCount);
             try {

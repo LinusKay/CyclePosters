@@ -74,6 +74,8 @@ posters:
         image: plugins\CyclePosters/welcome.png
         # message to show in chat upon click
         # messages can have both/either/neither of hover/URL 
+        # format messages using § formatting codes
+        # eg: §6 = red, §l = bold
         # OPTIONAL
         click_message: Learn about our cool event!
         # text to show on chat message hover
@@ -139,9 +141,8 @@ posters:
 
 * Add checks for existing images/posters
 * Re-factor for improved performance
-* Add customisable plugin messages
-* Add colours/formatting in click messages
 * Add function for deleting entire poster, to save on arduous manual labour
 * Allow poster slides to accept URLs, as well as local files
 * Allow interactions to be locked behind permission nodes
 * Allow slide interactions to perform different actions depending on player permissions
+* Improve customisability of give item on click feature

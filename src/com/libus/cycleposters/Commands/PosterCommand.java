@@ -8,30 +8,24 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.FileImageInputStream;
-import javax.imageio.stream.ImageInputStream;
-import java.awt.*;
-import java.io.File;
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class PosterCommand implements CommandExecutor {
 
-    private CyclePosters plugin;
+    private final CyclePosters plugin;
 
     public PosterCommand(CyclePosters pl) {
         plugin = pl;
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command cmd, @Nonnull String label, @Nonnull String[] args) {
         Player player = (Player) sender;
         if(player.hasPermission("cycleposters.manage")) {
-            if (args.length >= 0) {
+            if (args.length > 0) {
                 String command = args[0];
 
                 // CREATE POSTER INSTANCE
@@ -64,7 +58,11 @@ public class PosterCommand implements CommandExecutor {
                     if (args.length > 1) {
                         String posterName = args[1];
                         PosterRenderer renderer = new PosterRenderer(plugin);
-                        renderer.loadNextImage(posterName);
+                        try {
+                            renderer.loadNextImage(posterName);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
@@ -73,36 +71,5 @@ public class PosterCommand implements CommandExecutor {
             player.sendMessage("You do not have permission: cycleposters.manage");
         }
         return true;
-    }
-
-    /**
-     * Gets image dimensions for given file
-     *
-     * @param imgFile image file
-     * @return dimensions of image
-     * @throws IOException if the file is not a known image
-     */
-    public static Dimension getImageDimension(File imgFile) throws IOException {
-        int pos = imgFile.getName().lastIndexOf(".");
-        if (pos == -1)
-            throw new IOException("No extension for file: " + imgFile.getAbsolutePath());
-        String suffix = imgFile.getName().substring(pos + 1);
-        Iterator<ImageReader> iter = ImageIO.getImageReadersBySuffix(suffix);
-        while (iter.hasNext()) {
-            ImageReader reader = iter.next();
-            try {
-                ImageInputStream stream = new FileImageInputStream(imgFile);
-                reader.setInput(stream);
-                int width = reader.getWidth(reader.getMinIndex());
-                int height = reader.getHeight(reader.getMinIndex());
-                return new Dimension(width, height);
-            } catch (IOException e) {
-                System.out.println("Error reading: " + imgFile.getAbsolutePath() + e);
-            } finally {
-                reader.dispose();
-            }
-        }
-
-        throw new IOException("Not a known image file: " + imgFile.getAbsolutePath());
     }
 }
