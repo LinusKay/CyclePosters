@@ -10,9 +10,7 @@ NOTE: newly created posters will only begin their automatic cycle upon server re
 
 ## Commands
 
-#### /poster place \<poster name> \<width> \<height> \<image> [image .. image]
-
-*eg: /poster place events 3 2 welcome.png events/partyevent.png*
+**/poster place \<poster name> \<width> \<height> \<image> [image .. image]** - *eg: /poster place events 3 2 welcome.png events/partyevent.png*
 
 place poster of given size at click location. if more than one image is given, poster will automatically be set to cycle
 between slides every 10 seconds. if only one image is provided, cycling will be disabled. These can be edited in
@@ -23,9 +21,7 @@ data.yml.
 * height: height (in blocks) of poster
 * image: image name to us. image must be located within plugin/CyclePosters.
 
-#### /poster next \<poster name>
-
-*eg /poster next events*
+**/poster next \<poster name>** - *eg /poster next events*
 
 manually cycle poster to next slide
 
@@ -33,24 +29,29 @@ manually cycle poster to next slide
 
 ## Permissions
 
-#### cycleposters.manage
-
-required to run *any* commands
+**cycleposters.manage** - Required to run *any* commands
 
 ## Config Structure
 
 #### data.yml
 
-all poster data is stored in data.yml this contains the name, size and image data.
+All poster data is stored in data.yml this contains the name, size and image data. A number of custom settings can also be applied to each slide, which determine how the player can interact with the poster. With these additional settings you can:
+* send the player a message in chat, which may allow clicking to visit a set URL
+* teleport the player to a specific location
+* give the player an item
+* run a command, either as the player or console
 
 ```yaml
 posters:
   # unique name of poster
+  # REQUIREd
   events:
     #width and height (in blocks) of poster
+    # REQUIRED
     width: 3
     height: 2
     # IDs of all map objects belonging to poster
+    # REQUIRED
     maps:
       - 39
       - 40
@@ -60,33 +61,51 @@ posters:
       - 44
     # individual slides of poster
     # poster must include at least one slide, with no limit on the total amount
+    # REQUIRED
     slides:
+      # REQUIRED: at least one
       slide_0:
         # local file location of slide image
         # images must be located somewhere within plugins/CyclePosters
+        # REQUIRED: image will be black otherwise
         image: plugins\CyclePosters/welcome.png
         # message to show in chat upon click
         # messages can have both/either/neither of hover/URL 
+        # OPTIONAL
         click_message: Learn about our cool event!
         # text to show on chat message hover
+        # OPTIONAL
+        # DEPENDS ON click_message
         click_hover: Click here to visit our website!
+        # OPTIONAL
+        # DEPENDS ON click_message
         # link to take user to on chat message click
-        click_url: https://google.com/
-        # if true, player will be teleported to ground/highest block at location
-        # disable if not concerned about dangerous teleport location
-        teleport_safely: true
+        click_url: https://google.com/        
         # location to teleport user
         # first item must match name of existing world
         # following three are X Y Z respectively
+        # OPTIONAL
         teleport:
           - "world"
           - 2500
           - 100
           - -1739
+        # if true, player will be teleported to ground/highest block at location
+        # disable if not concerned about dangerous teleport location
+        # OPTIONAL
+        # DEPENDS ON teleport
+        teleport_safely: true
         # give item to user on click
         # name/lore are optional
+        # OPTIONAL
         click_item: STONE
+        # custom name to give to item
+        # OPTIONAL
+        # DEPENDS ON click_item
         click_item_name: §6Cool stone
+        # lore/item description to give to item
+        # OPTIONAL
+        # DEPENDS ON click_item
         click_item_lore:
           - §7This is a really cool item
           - §7Like. wow. amazing.
@@ -95,14 +114,21 @@ posters:
         # otherwise, if false or not set, command will be run by player that clicked
         # run_command accepts a number of placeholder values
         #   {player} = name of the player that clicked
-        run_command_as_console: false
+        # OPTIONAL
         run_command: op {player}
+        # set whether command run by player or console
+        # OPTIONAL
+        # DEPENDS ON run_command
+        run_command_as_console: false
     # currently displayed slide
     # will change whenever slide is updated
+    # REQUIRED
     current_slide_index: 0
     # time interval (in seconds) between automatic slide changes
     # auto set to 10 when multiple images are provided. 
-    # single image posters will be auto set to 0, meaning no cycle will take place.
+    # single image posters will be auto set to 0.
+    # if not set or set to 0, poster will not auto-cycle to next image
+    # OPTIONAL
     interval: 10
 ```
 
