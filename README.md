@@ -2,7 +2,7 @@
 
 ![Image of plugin in action. A 9x6 wall of maps displays a number of cycling images](https://media0.giphy.com/media/CwNQl9X9l7DRhNj3lg/giphy.gif?cid=790b761145b82b9ade04a9ddf83e11967d1708eb87dcb67d&rid=giphy.gif&ct=g)
 
-*PLEASE NOTE that this plugin is currently in early stages, and contains a number of unchecked errors and performance issues. It is not presently recommended for production servers, as you may experience issues. The plugin will also likely undergo a name change in the coming future.*
+*PLEASE NOTE that this plugin is currently in early stages, and contains a number of unchecked errors and major performance issues. It is not presently recommended for production servers, as you WILL experience issues. The plugin will also likely undergo a name change in the coming future.*
 
 
 A plugin that allows you to place any image in game, in the form of a "poster" made up of maps/item frames. These
